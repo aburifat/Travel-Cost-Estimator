@@ -8,6 +8,10 @@ Author URI: https://aburifat.com
 Plugin URI: https://aburifat.com
 */
 
+include_once(plugin_dir_path(__FILE__) . 'db/db-check.php');
+include_once(plugin_dir_path(__FILE__) . 'admin/menu-page.php');
+include_once(plugin_dir_path(__FILE__) . 'admin/field-list.php');
+include_once(plugin_dir_path(__FILE__) . 'admin/field-single.php');
 
 register_activation_hook(__FILE__, 'eg_tce_activation');
 
@@ -15,46 +19,6 @@ function eg_tce_activation(){
 	eg_tce_db_check();
 }
 
-function eg_tce_DB_check(){
-	global $wpdb;
-	if(eg_tce_table_not_exists("eg_tce_fields")){
-		$table = $wpdb->prefix . "eg_tce_fields";
-		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			name varchar(50),
-			serial_no int,
-			feature_image varchar(255),
-			notice text,
-			notice_type int,
-			value_type int,
-			value_count int,
-			PRIMARY KEY (id)
-		) "));
-	}
-	if(eg_tce_table_not_exists("eg_tce_values")){
-		$table = $wpdb->prefix . "eg_tce_values";
-		$table_fields = $wpdb->prefix . "eg_tce_fields";
-		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			field_id mediumint(9) NOT NULL,
-			text text,
-			image varchar(255),
-			price int,
-			PRIMARY KEY (id),
-			FOREIGN KEY (field_id) REFERENCES " . $table_fields . "(id)
-		) "));
-	}
-	//In future "users and records"
-}
 
-function eg_tce_table_not_exists($table){
-	global $wpdb;
-	$table = $wpdb->prefix . $table;
-	$query = "SHOW TABLE LIKE '".$table."'";
-	$result = $wpdb->get_var($query);
-	if($result == $table){
-		return false;
-	}else return true;
-}
 
 ?>
