@@ -1,11 +1,11 @@
 <?php
-function custom_menu_page() {
+function travel_cost_estimator_menu_page() {
     add_menu_page(
-        'Custom CRUD Page',
-        'Custom CRUD',
+        'Travel Cost Estimator',
+        'Travel Cost Estimator',
         'manage_options',
-        'custom-crud-menu',
-        'render_custom_crud_page'
+        'travel-cost-estimator-menu',
+        'render_travel_cost_estimator'
     );
 }
 
@@ -79,7 +79,7 @@ function get_field_list(){
 					echo '<td>' . $result->serial_no . '</td>';
 					echo '<td>' . $result->value_type . '</td>';
 					echo '<td>' . $result->value_count . '</td>';
-					echo '<td><a href="' . admin_url('admin.php?page=custom-crud-menu&field_id=' . $result->id) . '">Edit</a> | <a href="#">Delete</a>';
+					echo '<td><a href="' . admin_url('admin.php?page=travel-cost-estimator-menu&field_id=' . $result->id) . '">Edit</a> | <a href="#">Delete</a>';
                     // Add other columns here
                     echo '</tr>';
                 }
@@ -98,7 +98,7 @@ function get_single_field($field_id){
 
 
 
-function render_custom_crud_page() {
+function render_travel_cost_estimator() {
 	
 
 	$field_id = isset($_GET['field_id']) ? intval($_GET['field_id']) : 0;
@@ -112,7 +112,7 @@ function render_custom_crud_page() {
 
 
 
-add_action('admin_menu', 'custom_menu_page');
+add_action('admin_menu', 'travel_cost_estimator_menu_page');
 
 
 
