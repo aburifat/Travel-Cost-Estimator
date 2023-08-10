@@ -117,6 +117,8 @@ function get_value_list($field_id){
 	?>
 	<div class="wrap">
         <h2>Estimator Field Values [Field ID: <?php echo $field_id; ?>]</h2>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
         <h3>Add New Value</h3>
         <form method="POST">
             <label>Text: <input type="text" name="text"></label><br>
@@ -139,7 +141,7 @@ function get_value_list($field_id){
             </thead>
             <tbody>
                 <?php
-                $results = $wpdb->get_results("SELECT * FROM $table_name");
+                $results = $wpdb->get_results("SELECT * FROM $table_name WHERE field_id = $field_id");
                 foreach ($results as $result) {
 					$action_link_base = admin_url('admin.php?page=travel-cost-estimator-menu&field_id=' . $field_id . '&value_id=' . $result->id . '&action=');
                     echo '<tr>';
@@ -201,8 +203,11 @@ function get_edit_field($field_id){
 	?>
 	<div class="wrap">
         <h2>Estimator Field List</h2>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
         <h3>Update Field</h3>
         <form method="POST">
+			<label>ID: <input type="number" name="id" value="<?php echo $field_id; ?>" readonly></label><br>
             <label>Name: <input type="text" name="name" value="<?php echo $name; ?>"></label><br>
             <label>Serial Number: <input type="number" name="serial_no" value="<?php echo $serial_no; ?>"></label><br>
 			<label>Feature Image: <input type="text" name="feature_image" value="<?php echo $feature_image; ?>"></label><br>
@@ -251,8 +256,11 @@ function get_edit_value($value_id,$field_id){
 	?>
 	<div class="wrap">
 		<h2>Estimator Field Values [Field ID: <?php echo $field_id; ?>]</h2>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu&field_id='. $field_id .'&action=2'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
         <h3>Update Value</h3>
         <form method="POST">
+			<label>ID: <input type="number" name="id" value="<?php echo $value_id; ?>" readonly></label><br>
             <label>Field ID: <input type="number" name="field_id" value="<?php echo $field_id; ?>" readonly></label><br>
             <label>Text: <input type="text" name="text" value="<?php echo $text; ?>"></label><br>
 			<label>Image: <input type="text" name="image" value="<?php echo $image; ?>"></label><br>

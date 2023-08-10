@@ -10,14 +10,13 @@ Plugin URI: https://aburifat.com
 
 include_once(plugin_dir_path(__FILE__) . 'db/db-check.php');
 include_once(plugin_dir_path(__FILE__) . 'admin/menu-page.php');
-include_once(plugin_dir_path(__FILE__) . 'admin/field-list.php');
-include_once(plugin_dir_path(__FILE__) . 'admin/field-single.php');
 
 register_activation_hook(__FILE__, 'eg_tce_activation');
 
 function eg_tce_activation(){
 	eg_tce_db_check();
 }
+
 
 
 
