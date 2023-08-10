@@ -11,7 +11,6 @@ function eg_tce_DB_check(){
 			notice text,
 			notice_type int,
 			value_type int,
-			value_count int,
 			PRIMARY KEY (id)
 		) "));
 	}
