@@ -1,4 +1,91 @@
 <?php
+
+function get_style(){
+	?>
+		<style>
+		.tce-hidden{
+			display:none;
+		}
+		.tce-title-button{
+			display:flex;
+			justify-content:left;
+			align-items:center;
+		}
+		.tce-button {
+		background-color: initial;
+		border-radius: 5px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0 2px 4px;
+		color: #FFFFFF;
+		cursor: pointer;
+		display: inline-block;
+		outline: 0;
+		overflow: hidden;
+		padding: 8px 10px;
+		pointer-events: auto;
+		position: relative;
+		text-align: center;
+		touch-action: manipulation;
+		user-select: none;
+		-webkit-user-select: none;
+		vertical-align: top;
+		white-space: nowrap;
+		border: 0;
+		height:36px;
+		}
+		.tce-button-info{
+			background-image: linear-gradient(-180deg, #2d95e5, #276da3);
+		}
+		.tce-button-info:hover {
+		background: #276da3;
+		}
+		.tce-button-success{
+			background-image: linear-gradient(-180deg, #40d686, #27a361);
+		}
+		.tce-button-success:hover {
+		background: #27a361;
+		}
+		.tce-button-danger{
+			background-image: linear-gradient(-180deg, #ed5a5a, #e23434);
+		}
+		.tce-button-danger:hover {
+		background: #e23434;
+		}
+		.tce-form{
+			border:1px solid #00000022;
+			box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
+			width: 600px;
+			margin:auto;
+			padding:20px;
+		}
+		.tce-form input{
+			width:100%;
+			margin: 5px 0px 10px 0px;
+		}
+		.tce-form select{
+			margin: 5px 5px 10px 0px;
+		}
+		.tce-table td{
+			line-height: 2em!important;
+		}
+		</style>
+	<?php
+}
+
+function get_script(){
+	?>
+	<script>
+	function toggle_add_field() {
+		var form = document.querySelector('.add-field-form');
+		form.classList.toggle('tce-hidden');
+	}
+	function toggle_add_value() {
+		var form = document.querySelector('.add-value-form');
+		form.classList.toggle('tce-hidden');
+	}
+	</script>
+	<?php
+}
+
 function travel_cost_estimator_menu_page() {
     add_menu_page(
         'Travel Cost Estimator',
@@ -352,10 +439,12 @@ function delete_value($value_id){
 
 
 function render_travel_cost_estimator() {
-	
 	$field_id = isset($_GET['field_id']) ? intval($_GET['field_id']) : 0;
 	$value_id = isset($_GET['value_id']) ? intval($_GET['value_id']) : 0;
 	$action = isset($_GET['action']) ? intval($_GET['action']) : 0;
+
+	get_style();
+	get_script();
 
 	if($value_id != 0 && $field_id != 0){
 		if($action == 1){
@@ -380,14 +469,9 @@ function render_travel_cost_estimator() {
 	}else{
 		get_field_list();
 	}
+
 }
 
-
-
 add_action('admin_menu', 'travel_cost_estimator_menu_page');
-
-
-
-
 
 ?>
