@@ -7,9 +7,11 @@ Author: Abu Rifat Muhammed Al Hasib
 Author URI: https://aburifat.com
 Plugin URI: https://aburifat.com
 */
-
-include_once(plugin_dir_path(__FILE__) . 'db/db-check.php');
-include_once(plugin_dir_path(__FILE__) . 'admin/menu-page.php');
+include_once(plugin_dir_path(__FILE__) . 'etc/style.php');
+include_once(plugin_dir_path(__FILE__) . 'database/database-manager.php');
+include_once(plugin_dir_path(__FILE__) . 'admin/admin-functions.php');
+include_once(plugin_dir_path(__FILE__) . 'public/public-functions.php');
+include_once(plugin_dir_path(__FILE__) . 'etc/scripts.php');
 
 register_activation_hook(__FILE__, 'eg_tce_activation');
 
