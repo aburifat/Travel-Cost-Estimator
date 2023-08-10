@@ -38,16 +38,8 @@ function get_field_list(){
 	?>
 	<div class="wrap">
         <h2>Estimator Field List</h2>
-
-        <!-- Add Record Form -->
-        <span class="tce-title-button"><h3>Add New Field</h3>&nbsp;<button class="tce-button tce-button-success" onclick="toggle_add_field()">Add New</button></span>
-		<script>
-			
-		</script>
-		<style>
-			
-		</style>
-        <form class="tce-form add-field-form hidden" method="POST">
+        <button class="tce-button tce-button-success" onclick="toggle_add_field()">Add New</button>
+        <form class="tce-form add-field-form tce-hidden" method="POST">
 			<h3 style="text-align:center;">Add New Field</h3>
             <label>Name: <input type="text" name="name"></label><br>
 			<label>Serial Number: <input type="number" name="serial_no"></label><br>
@@ -65,13 +57,11 @@ function get_field_list(){
 					<option value="2">Text with Image</option>
 				</select>
 			</label>
-            <!-- Add other fields here -->
             <input class="tce-button tce-button-info" type="submit" name="add_field" value="Add Field">
         </form>
 
-        <!-- Display Records -->
         <h3>Fields</h3>
-        <table class="wp-list-table widefat striped">
+        <table class="wp-list-table widefat striped tce-table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -82,7 +72,6 @@ function get_field_list(){
 					<th>Notice Type</th>
 					<th>Value Type</th>
 					<th>Actions</th>
-                    <!-- Add other headers here -->
                 </tr>
             </thead>
             <tbody>
@@ -96,10 +85,17 @@ function get_field_list(){
 					echo '<td>' . $result->serial_no . '</td>';
 					echo '<td>' . $result->feature_image . '</td>';
 					echo '<td>' . $result->notice . '</td>';
-					echo '<td>' . $result->notice_type . '</td>';
-					echo '<td>' . $result->value_type . '</td>';
+					if($result->notice_type == 1){
+						echo '<td>Info</td>';
+					}else{
+						echo '<td>Alert</td>';
+					}
+					if($result->value_type == 1){
+						echo '<td>Text</td>';
+					}else{
+						echo '<td>Text with Image</td>';
+					}
 					echo '<td><a href="' . $action_link_base . "1" . '"><button class="tce-button tce-button-info">Edit Field</button></a>  <a href="' . $action_link_base . "2" . '"><button class="tce-button tce-button-info">Edit Values</button></a>  <a href="' . $action_link_base . '3" onclick="return confirm(\'Are you sure you want to delete this field?\')"><button class="tce-button tce-button-danger">Delete</button></a>';
-                    // Add other columns here
                     echo '</tr>';
                 }
                 ?>
@@ -113,45 +109,64 @@ function get_field_list(){
 function get_value_list($field_id){
 	global $wpdb;
     $table_name = $wpdb->prefix . "eg_tce_values";
+	$table_field = $wpdb->prefix . "eg_tce_fields";
+	$field = $wpdb->get_row("SELECT * FROM $table_field WHERE id = $field_id");
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['add_value'])) {
             $text = sanitize_text_field($_POST['text']);
-            $image = sanitize_text_field($_POST['image']);
+			if($field->value_type == 2){
+            	$image = sanitize_text_field($_POST['image']);
+			}
             $price = intval($_POST['price']);
-
-            $wpdb->insert(
-                $table_name,
-                array(
-					'field_id' => $field_id,
-                    'text' => $text,
-                    'image' => $image,
-                    'price' => $price,
-                )
-            );
+			if($field->value_type == 2){
+				$wpdb->insert(
+					$table_name,
+					array(
+						'field_id' => $field_id,
+						'text' => $text,
+						'image' => $image,
+						'price' => $price,
+					)
+				);
+			}else{
+				$wpdb->insert(
+					$table_name,
+					array(
+						'field_id' => $field_id,
+						'text' => $text,
+						'price' => $price,
+					)
+				);
+			}
         }
     }
 	?>
 	<div class="wrap">
         <h2>Estimator Field Values [Field ID: <?php echo $field_id; ?>]</h2>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
-        <h3>Add New Value</h3>
-        <form method="POST">
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-admin-home"></span></button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-arrow-left-alt"></span></button></a>
+		<button class="tce-button tce-button-success" onclick="toggle_add_value()">Add New</button>
+        <form class="tce-form add-value-form tce-hidden" method="POST">
+			<h3 style="text-align:center;">Add New Value</h3>
             <label>Text: <input type="text" name="text"></label><br>
-			<label>Image: <input type="text" name="image"></label><br>
+			<?php if($field->value_type == 2){ ?>
+				<label>Image: <input type="text" name="image"></label><br>
+			<?php } ?>
 			<label>price: <input type="number" name="price"></label><br>
-            <input type="submit" name="add_value" value="Add Field">
+            <input class="tce-button tce-button-info" type="submit" name="add_value" value="Add Value">
         </form>
 
         <h3>Values</h3>
-        <table class="wp-list-table widefat striped">
+        <table class="wp-list-table widefat striped tce-table">
             <thead>
                 <tr>
                     <th>ID</th>
 					<th>Field ID</th>
                     <th>Text</th>
-					<th>Image</th>
+					<?php if($field->value_type == 2){ ?>
+						<th>Image</th>
+					<?php } ?>
 					<th>Price</th>
 					<th>Actions</th>
                 </tr>
@@ -165,9 +180,11 @@ function get_value_list($field_id){
                     echo '<td>' . $result->id . '</td>';
 					echo '<td>' . $result->field_id . '</td>';
                     echo '<td>' . esc_html($result->text) . '</td>';
-					echo '<td>' . $result->image . '</td>';
+					if($field->value_type == 2){
+						echo '<td>' . $result->image . '</td>';
+					}
 					echo '<td>' . $result->price . '</td>';
-					echo '<td><a href="' . $action_link_base . "1" . '">Edit Value</a> | <a href="' . $action_link_base . '2" onclick="return confirm(\'Are you sure you want to delete this value?\')">Delete</a>';
+					echo '<td><a href="' . $action_link_base . "1" . '"><button class="tce-button tce-button-info">Edit Value</button></a>  <a href="' . $action_link_base . '2" onclick="return confirm(\'Are you sure you want to delete this value?\')"><button class="tce-button tce-button-danger">Delete</button></a>';
                     echo '</tr>';
                 }
                 ?>
@@ -220,18 +237,28 @@ function get_edit_field($field_id){
 	?>
 	<div class="wrap">
         <h2>Estimator Field List</h2>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
-        <h3>Update Field</h3>
-        <form method="POST">
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-admin-home"></span></button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-arrow-left-alt"></span></button></a>
+        <form class="tce-form" method="POST">
+			<h3 style="text-align:center;">Update Field</h3>
 			<label>ID: <input type="number" name="id" value="<?php echo $field_id; ?>" readonly></label><br>
             <label>Name: <input type="text" name="name" value="<?php echo $name; ?>"></label><br>
             <label>Serial Number: <input type="number" name="serial_no" value="<?php echo $serial_no; ?>"></label><br>
 			<label>Feature Image: <input type="text" name="feature_image" value="<?php echo $feature_image; ?>"></label><br>
 			<label>Notice: <input type="text" name="notice" value="<?php echo $notice; ?>"></label><br>
-			<label>Notice Type: <input type="number" name="notice_type" value="<?php echo $notice_type; ?>"></label><br>
-			<label>Value Type: <input type="number" name="value_type" value="<?php echo $value_type; ?>"></label><br>
-            <input type="submit" name="update_field" value="Update Field">
+			<label>Notice Type: 
+				<select name="notice_type">
+					<option value="1" <?php if ($notice_type == 1) echo 'selected'; ?>>Info</option>
+					<option value="2" <?php if ($notice_type == 2) echo 'selected'; ?>>Alert</option>
+				</select>
+			</label>
+			<label>Value Type:
+				<select name="value_type">
+					<option value="1" <?php if ($notice_type == 1) echo 'selected'; ?>>Text</option>
+					<option value="2" <?php if ($notice_type == 2) echo 'selected'; ?>>Text with Image</option>
+				</select>
+			</label>
+            <input class="tce-button tce-button-info" type="submit" name="update_field" value="Update Field">
         </form>
     </div>
 	<?php
@@ -241,23 +268,37 @@ function get_edit_field($field_id){
 function get_edit_value($value_id,$field_id){
 	global $wpdb;
     $table_name = $wpdb->prefix . "eg_tce_values";
+	$table_field = $wpdb->prefix . "eg_tce_fields";
+	$the_field = $wpdb->get_row("SELECT * FROM $table_field WHERE id = $field_id");
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['update_value'])) {
 
 			$text = sanitize_text_field($_POST['text']);
-            $image = sanitize_text_field($_POST['image']);
+			if($the_field->value_type == 2){
+            	$image = sanitize_text_field($_POST['image']);
+			}
             $price = intval($_POST['price']);
-
-            $wpdb->update(
-                $table_name,
-                array(
-                    'text' => $text,
-                    'image' => $image,
-                    'price' => $price,
-				),
-				array('id' => $value_id)
-            );
+			if($the_field->value_type == 2){
+				$wpdb->update(
+					$table_name,
+					array(
+						'text' => $text,
+						'image' => $image,
+						'price' => $price,
+					),
+					array('id' => $value_id)
+				);
+			}else{
+				$wpdb->update(
+					$table_name,
+					array(
+						'text' => $text,
+						'price' => $price,
+					),
+					array('id' => $value_id)
+				);
+			}
         }
     }else{
 		$field = $wpdb->get_row(
@@ -265,7 +306,9 @@ function get_edit_value($value_id,$field_id){
 		);
 		if($field){
 			$text = $field->text;
-			$image = $field->image;
+			if($the_field->value_type == 2){
+				$image = $field->image;
+			}
 			$price = $field->price;
 		}
 		
@@ -273,16 +316,18 @@ function get_edit_value($value_id,$field_id){
 	?>
 	<div class="wrap">
 		<h2>Estimator Field Values [Field ID: <?php echo $field_id; ?>]</h2>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button><span class="dashicons dashicons-admin-home"></span> Home</button></a>
-		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu&field_id='. $field_id .'&action=2'); ?>"><button><span class="dashicons dashicons-arrow-left-alt"></span> Back</button></a>
-        <h3>Update Value</h3>
-        <form method="POST">
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-admin-home"></span></button></a>
+		<a href="<?php echo admin_url('admin.php?page=travel-cost-estimator-menu&field_id='. $field_id .'&action=2'); ?>"><button class="tce-button tce-button-info"><span class="dashicons dashicons-arrow-left-alt"></span></button></a>
+        <form class="tce-form" method="POST">
+			<h3 style="text-align:center;">Update Value</h3>
 			<label>ID: <input type="number" name="id" value="<?php echo $value_id; ?>" readonly></label><br>
             <label>Field ID: <input type="number" name="field_id" value="<?php echo $field_id; ?>" readonly></label><br>
             <label>Text: <input type="text" name="text" value="<?php echo $text; ?>"></label><br>
-			<label>Image: <input type="text" name="image" value="<?php echo $image; ?>"></label><br>
+			<?php if($the_field->value_type == 2){ ?>
+				<label>Image: <input type="text" name="image" value="<?php echo $image; ?>"></label><br>
+			<?php } ?>
 			<label>Price: <input type="number" name="price" value="<?php echo $price; ?>"></label><br>
-            <input type="submit" name="update_value" value="Update Value">
+            <input class="tce-button tce-button-info" type="submit" name="update_value" value="Update Value">
         </form>
     </div>
 	<?php

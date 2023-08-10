@@ -1,6 +1,6 @@
 <style>
-	
-.hidden{
+
+.tce-hidden{
 	display:none;
 }
 
@@ -29,6 +29,7 @@
   vertical-align: top;
   white-space: nowrap;
   border: 0;
+  height:36px;
 }
 
 .tce-button-info{
@@ -70,6 +71,10 @@
 
 .tce-form select{
 	margin: 5px 5px 10px 0px;
+}
+
+.tce-table td{
+	line-height: 2em!important;
 }
 
 
