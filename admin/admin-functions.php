@@ -57,7 +57,7 @@ function get_style(){
 			margin:auto;
 			padding:20px;
 		}
-		.tce-form input{
+		.tce-form input, .tce-form textarea{
 			width:100%;
 			margin: 5px 0px 10px 0px;
 		}
@@ -66,6 +66,7 @@ function get_style(){
 		}
 		.tce-table td{
 			line-height: 2em!important;
+			max-width:15vw!important;
 		}
 		</style>
 	<?php
@@ -80,6 +81,10 @@ function get_script(){
 	}
 	function toggle_add_value() {
 		var form = document.querySelector('.add-value-form');
+		form.classList.toggle('tce-hidden');
+	}
+	function toggle_update_settings() {
+		var form = document.querySelector('.edit-settings-form');
 		form.classList.toggle('tce-hidden');
 	}
 	</script>
@@ -108,6 +113,7 @@ function get_field_list(){
             $notice = sanitize_text_field($_POST['notice']);
             $notice_type = intval($_POST['notice_type']);
             $value_type = intval($_POST['value_type']);
+			$is_required = intval($_POST['is_required']);
 
             $wpdb->insert(
                 $table_name,
@@ -118,13 +124,18 @@ function get_field_list(){
                     'notice' => $notice,
                     'notice_type' => $notice_type,
                     'value_type' => $value_type,
+					'is_required' => $is_required,
                 )
             );
-        }
+        }else if(isset($_POST['tce_update_settings'])){
+			$disclaimer = $_POST['disclaimer'];
+			update_option('tce_disclaimer_option', $disclaimer);
+		}
     }
 	?>
 	<div class="wrap">
         <h2>Estimator Field List</h2>
+		<button class="tce-button tce-button-info" onclick="toggle_update_settings()"><span class="dashicons dashicons-admin-generic"></span></button>
         <button class="tce-button tce-button-success" onclick="toggle_add_field()">Add New</button>
         <form class="tce-form add-field-form tce-hidden" method="POST">
 			<h3 style="text-align:center;">Add New Field</h3>
@@ -144,7 +155,20 @@ function get_field_list(){
 					<option value="2">Text with Image</option>
 				</select>
 			</label>
+			<label>Required:
+				<select name="is_required">
+					<option value="1">Yes</option>
+					<option value="2">No</option>
+				</select>
+			</label>
             <input class="tce-button tce-button-info" type="submit" name="add_field" value="Add Field">
+        </form>
+
+		<form class="tce-form edit-settings-form tce-hidden" method="POST">
+			<h3 style="text-align:center;">Edit Settings</h3>
+            <label>Disclaimer:</label><br>
+			<textarea name="disclaimer" rows="10"><?php echo get_option('tce_disclaimer_option'); ?></textarea><br>
+            <input class="tce-button tce-button-info" type="submit" name="tce_update_settings" value="Update Settings">
         </form>
 
         <h3>Fields</h3>
@@ -158,6 +182,7 @@ function get_field_list(){
 					<th>Notice</th>
 					<th>Notice Type</th>
 					<th>Value Type</th>
+					<th>Required</th>
 					<th>Actions</th>
                 </tr>
             </thead>
@@ -181,6 +206,11 @@ function get_field_list(){
 						echo '<td>Text</td>';
 					}else{
 						echo '<td>Text with Image</td>';
+					}
+					if($result->is_required == 1){
+						echo '<td>Yes</td>';
+					}else{
+						echo '<td>No</td>';
 					}
 					echo '<td><a href="' . $action_link_base . "1" . '"><button class="tce-button tce-button-info">Edit Field</button></a>  <a href="' . $action_link_base . "2" . '"><button class="tce-button tce-button-info">Edit Values</button></a>  <a href="' . $action_link_base . '3" onclick="return confirm(\'Are you sure you want to delete this field?\')"><button class="tce-button tce-button-danger">Delete</button></a>';
                     echo '</tr>';
@@ -293,6 +323,7 @@ function get_edit_field($field_id){
             $notice = sanitize_text_field($_POST['notice']);
             $notice_type = intval($_POST['notice_type']);
             $value_type = intval($_POST['value_type']);
+			$is_required = intval($_POST['is_required']);
 
             $wpdb->update(
                 $table_name,
@@ -303,6 +334,7 @@ function get_edit_field($field_id){
                     'notice' => $notice,
                     'notice_type' => $notice_type,
                     'value_type' => $value_type,
+					'is_required' => $is_required,
 				),
 				array('id' => $field_id)
             );
@@ -318,6 +350,7 @@ function get_edit_field($field_id){
 			$notice = $field->notice;
 			$notice_type = $field->notice_type;
 			$value_type = $field->value_type;
+			$is_required = $field->is_required;
 		}
 		
 	}
@@ -343,6 +376,12 @@ function get_edit_field($field_id){
 				<select name="value_type">
 					<option value="1" <?php if ($notice_type == 1) echo 'selected'; ?>>Text</option>
 					<option value="2" <?php if ($notice_type == 2) echo 'selected'; ?>>Text with Image</option>
+				</select>
+			</label>
+			<label>Required:
+				<select name="is_required">
+					<option value="1" <?php if ($is_required == 1) echo 'selected'; ?>>Yes</option>
+					<option value="2" <?php if ($is_required == 2) echo 'selected'; ?>>No</option>
 				</select>
 			</label>
             <input class="tce-button tce-button-info" type="submit" name="update_field" value="Update Field">
