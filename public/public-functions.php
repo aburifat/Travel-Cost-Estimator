@@ -17,6 +17,20 @@ function tce_calculator(){
 	$fields = $wpdb->get_results("SELECT * FROM $table_fields");
 	
 	?>
+	<style>
+		.field_title{
+			text-align:center;
+			padding:10px;
+			margin: 10px 0px;
+			background-color: #F8F8F8;
+			box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+			font-weight:bold;
+		}
+		.field_values{
+			padding: 20px;
+		}
+
+	</style>
 	<script>
 		
 
@@ -41,7 +55,7 @@ function tce_calculator(){
 			<?php
 				echo $field->name;
 				if($field->is_required == 1){
-					echo " (필수)";
+					echo " <span style='color:red;'>(필수)</span>";
 				}
 			?>
 		</div>
