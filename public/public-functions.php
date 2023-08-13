@@ -25,9 +25,32 @@ function tce_calculator(){
 			background-color: #F8F8F8;
 			box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
 			font-weight:bold;
+			color:#6F6F6F;
 		}
 		.field_values{
 			padding: 20px;
+			display:flex;
+			font-weight:bold;
+			color:#6F6F6F;
+		}
+		.text_alert{
+			color:#E04E5F;
+		}
+		.text_info{
+			color:#398AC5;
+		}
+		.tce_image_feature{
+			height: 150px;
+			width:auto;
+			padding-right:20px;
+		}
+
+		.tce_image_value{
+			height: 100px;
+			width:auto;
+		}
+		.tce_notice{
+			font-weight:bold;
 		}
 
 	</style>
@@ -55,7 +78,7 @@ function tce_calculator(){
 			<?php
 				echo $field->name;
 				if($field->is_required == 1){
-					echo " <span style='color:red;'>(필수)</span>";
+					echo ' <span class="text_alert">(필수)</span>';
 				}
 			?>
 		</div>
@@ -63,29 +86,42 @@ function tce_calculator(){
 			<?php
 			if(is_valid_image($field->feature_image)){
 				?>
-				<div class="field_feature_image"><img src="<?php echo $field->feature_image; ?>"></div>
+				<div class="field_feature_image"><img class="tce_image_feature" src="<?php echo $field->feature_image; ?>"></div>
+				<style>
+					.field_values{
+						
+					}
+				</style>
 				<?php
 			}
 			?>
-			<div>
+			<div style="">
 			<?php
 			$values = $wpdb->get_results("SELECT * FROM $table_values WHERE field_id = $field->id");
 			foreach($values as $value){
 				?>
+				<div style="display:inline-block;padding:0px 10px;">
 					<?php
 					if($field->value_type == 2){
 						?>
-						<img src="<?php echo $value->image; ?>">
+						<img class="tce_image" src="<?php echo $value->image; ?>"><br>
 						<?php
 					}
 					?>
+					<div style="text-align:center;">
 					<input type="checkbox" class="tce_value_checkbox" name="myCheckbox" id="value_<?php echo $value->id; ?>" value="<?php echo $value->price; ?>">
 					<label for="value_<?php echo $value->id; ?>"><?php echo $value->text; ?></label>
+					</div>
+				</div>
 				<?php
 			}
 			?>
 			</div>
+			
 		</div>
+		<div>
+				<br><span class="tce_notice <?php echo ($field->notice_type==1)?'text_info':'text_alert' ?>"><?php echo $field->notice; ?></span>
+			</div>
 	<?php } ?>
 	<?php
 	return ob_get_clean();
