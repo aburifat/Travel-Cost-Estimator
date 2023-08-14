@@ -8,8 +8,9 @@ function is_valid_image($image_url){
 	return false;
 }
 
-function tce_calculator(){
+function tce_cost_estimator($name, $email, $year){
 	ob_start();
+
 	global $wpdb;
 	$table_fields = $wpdb->prefix . "eg_tce_fields";
 	$table_values = $wpdb->prefix . "eg_tce_values";
@@ -127,6 +128,90 @@ function tce_calculator(){
 	return ob_get_clean();
 }
 
-add_shortcode('tce_calculator', 'tce_calculator');
+function tce_user_info_form(){
+	ob_start();
+	?>
+	<form action="" method="get">
+        <label for="tce_name">Name:</label>
+        <input type="text" id="tce_name" name="tce_name" required><br><br>
+        
+        <label for="tce_email">Email:</label>
+        <input type="email" id="tce_email" name="tce_email" required><br><br>
+
+		<label for="tce_gender">성별:</label>
+		<select name="tce_gender">
+			<option value="남">남</option>
+			<option value="여">여</option>
+		</select><br><br>
+        
+        <label for="tce_year">Year of Birth:</label>
+        <input type="number" id="tce_year" name="tce_year" required><br><br>
+        
+        <input type="submit" value="Submit">
+    </form>
+	<?php
+	return ob_get_clean();
+}
+
+function tce_quote_list(){
+	return 1;
+}
+
+function tce_single_quote(){ //have to pass the $tce_user_id
+	$tce_user_id = 1;
+	ob_start();
+
+	$tce_user_allowed = false;
+	if(isset($_SESSION['authenticated'][$tce_user_id]) && $_SESSION['authenticated'][$tce_user_id] == true){
+		$tce_user_allowed = true;
+	}
+
+	global $wpdb;
+	$table_user_info = $wpdb->prefix . "eg_tce_user_info";
+	$user_info = $wpdb->get_row("SELECT * FROM $table_user_info WHERE id = $tce_user_id");
+
+	if($tce_user_allowed == false){
+		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+			if (isset($_POST['check_user_password'])) {
+				$user_password = sanitize_text_field($_POST['user_password']);
+				$hashed_password = md5($user_password);
+
+				if($hashed_password == $user_info->password){
+					$_SESSION['authenticated'][$tce_user_id] = true;
+					$tce_user_allowed = true;
+
+				}
+			}
+		}
+	}
+
+	if($tce_user_allowed == false){
+		?>
+		<form action="" method="POST">
+			<label for="user_password">Password:</label>
+			<input type="password" id="user_password" name="user_password" required><br><br>
+			
+			<input type="submit" name="check_user_password" value="Submit">
+		</form>
+		<?php
+	}else{
+		echo "Wow!";
+	}
+
+	return ob_get_clean();
+}
+
+function tce_calculator(){
+	$name = isset($_GET['tce_name']) ? sanitize_text_field($_GET['tce_name']) : '';
+    $email = isset($_GET['tce_email']) ? sanitize_email($_GET['tce_email']) : '';
+    $year = isset($_GET['tce_year']) ? intval($_GET['tce_year']) : 0;
+	if(!empty($name)&&!empty($email)&&!empty($year)){
+		return tce_the_estimator($name, $email, $year);
+	}else{
+		return tce_personal_info_form();
+	}
+}
+
+add_shortcode('tce_calculator', 'tce_single_quote');
 
 ?>
