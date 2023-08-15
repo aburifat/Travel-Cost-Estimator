@@ -131,24 +131,88 @@ function tce_cost_estimator($name, $email, $gender, $year){
 function tce_user_info_form(){
 	ob_start();
 	?>
-	<form action="" method="get">
-        <label for="tce_name">Name:</label>
-        <input type="text" id="tce_name" name="tce_name" required><br><br>
-        
-        <label for="tce_email">Email:</label>
-        <input type="email" id="tce_email" name="tce_email" required><br><br>
+	<style>
+		.tce-form{
+			border:1px solid #00000022;
+			border-top:2px solid black;
+			/*box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;*/
+			width: 100%;
+			margin:auto;
+			padding:20px;
+		}
+		.tce-form-button-div{
+			display:flex;
+			justify-content:center;
+		}
+		.tce-form input, .tce-form textarea, .tce-form select{
+			width:100%;
+			margin: 5px 0px 10px 0px;
+		}
+		.tce-form input[type="radio"], .tce-form input[type="submit"]{
+			width:auto;
+		}
+		.tce-form-header{
+			display:flex;
+			justify-content:space-between;
+		}
+		.tce-form-header-text{
+			line-height:1em;
+			display:flex;
+			flex-direction:column;
+			justify-content:center;
+		}
+
+		@media (max-width:767px){
+			.tce-form-header{
+				display:block;
+			}
+			.tce-form-header-text{
+				display:block;
+				text-align:center;
+			}
+			.tce-form-header-image{
+				text-align:center;
+			}
+		}
+	</style>
+	<?php
+		$user_form_header_text = get_option('user_form_header_text');
+		$user_form_header_image = get_option('user_form_header_image');
+	?>
+	<div class="tce-form-header">
+		<div class="tce-form-header-text">
+			<?php echo $user_form_header_text; ?>
+		</div>
+		<div class="tce-form-header-image">
+			<img src="<?php echo $user_form_header_image; ?>">
+		</div>
+	</div>
+	<form class="tce-form" action="" method="POST">
+        <input type="text" id="tce_name" name="tce_name" placeholder="이름" required>
+        <input type="email" id="tce_email" name="tce_email" placeholder="연락처" required>
 
 		<label for="tce_gender">성별:</label>
-		<select name="tce_gender">
-			<option value="남">남</option>
-			<option value="여">여</option>
-		</select><br><br>
+		<span>남</span>
+		<input type="radio" name="tce_gender" value="남">
+		<span>여</span>
+		<input type="radio" name="tce_gender" value="여"><br>
         
         <label for="tce_year">Year of Birth:</label>
-        <input type="number" id="tce_year" name="tce_year" required><br><br>
+		<select name="tce_year" required>
+			<option value="">나이</option>
+			<?php
+			for($i=1950;$i<=2005;$i++){
+				echo '<option value='. $i .'>' . $i . '</option>';
+			}
+			?>
+		</select>
+        <div class="tce-form-button-div">
+			<input style="background-color:#c30000;color:white;" type="submit" name="user_info_submitted" value="견적문의신청하기">&nbsp;
+			</form><form style="display:inline;">
+			<input style="background-color:#3c3c3c;color:white;" type="submit" name="quote-list" value="신청목록보기"></form>
+		</div>
         
-        <input type="submit" value="Submit">
-    </form>
+    
 	<?php
 	return ob_get_clean();
 }
@@ -161,11 +225,6 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 	$tce_user_id = 1;
 	ob_start();
 
-	$tce_user_allowed = false;
-	if(isset($_SESSION['authenticated'][$tce_user_id]) && $_SESSION['authenticated'][$tce_user_id] == true){
-		$tce_user_allowed = true;
-	}
-
 	global $wpdb;
 	$table_user_info = $wpdb->prefix . "eg_tce_user_info";
 	$user_info = $wpdb->get_row("SELECT * FROM $table_user_info WHERE id = $tce_user_id");
@@ -175,10 +234,7 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 			if (isset($_POST['check_user_password'])) {
 				$user_password = sanitize_text_field($_POST['user_password']);
 				$hashed_password = md5($user_password);
-
 				if($hashed_password == $user_info->password){
-					$_SESSION['authenticated'][$tce_user_id] = true;
-					$tce_user_allowed = true;
 
 				}
 			}
@@ -202,10 +258,13 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 }
 
 function tce_calculator(){
-	$name = isset($_GET['tce_name']) ? sanitize_text_field($_GET['tce_name']) : '';
-    $email = isset($_GET['tce_email']) ? sanitize_email($_GET['tce_email']) : '';
-	$gender = isset($_GET['tce_gender'])? sanitize_text_field( $_GET['tce_gender'] ) : '';
-    $year = isset($_GET['tce_year']) ? intval($_GET['tce_year']) : 0;
+	if(isset($_POST['user_info_submitted'])){
+		$name = isset($_POST['tce_name']) ? sanitize_text_field($_POST['tce_name']) : '';
+		$email = isset($_POST['tce_email']) ? sanitize_email($_POST['tce_email']) : '';
+		$gender = isset($_POST['tce_gender'])? sanitize_text_field( $_POST['tce_gender'] ) : '';
+		$year = isset($_POST['tce_year']) ? intval($_POST['tce_year']) : 0;
+	}
+	
 	if(!empty($name)&&!empty($email)&&!empty($gender)&&!empty($year)){
 		return tce_cost_estimator($name, $email, $gender, $year);
 	}else{
