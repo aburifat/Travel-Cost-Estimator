@@ -8,7 +8,7 @@ function is_valid_image($image_url){
 	return false;
 }
 
-function tce_cost_estimator($name, $email, $year){
+function tce_cost_estimator($name, $email, $gender, $year){
 	ob_start();
 
 	global $wpdb;
@@ -204,14 +204,15 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 function tce_calculator(){
 	$name = isset($_GET['tce_name']) ? sanitize_text_field($_GET['tce_name']) : '';
     $email = isset($_GET['tce_email']) ? sanitize_email($_GET['tce_email']) : '';
+	$gender = isset($_GET['tce_gender'])? sanitize_text_field( $_GET['tce_gender'] ) : '';
     $year = isset($_GET['tce_year']) ? intval($_GET['tce_year']) : 0;
-	if(!empty($name)&&!empty($email)&&!empty($year)){
-		return tce_the_estimator($name, $email, $year);
+	if(!empty($name)&&!empty($email)&&!empty($gender)&&!empty($year)){
+		return tce_cost_estimator($name, $email, $gender, $year);
 	}else{
-		return tce_personal_info_form();
+		return tce_user_info_form();
 	}
 }
 
-add_shortcode('tce_calculator', 'tce_single_quote');
+add_shortcode('tce_calculator', 'tce_calculator');
 
 ?>
