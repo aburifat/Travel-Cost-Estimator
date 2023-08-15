@@ -133,15 +133,14 @@ function get_field_list(){
 			$user_form_header_image = $_POST['user_form_header_image'];
 			$estimator_header_text = stripcslashes($_POST['estimator_header_text']);
 			$estimator_header_image = $_POST['estimator_header_image'];
-
-			echo $user_form_header_text;
-			echo $estimator_header_text;
+			$estimate_in_form_image = $_POST['estimate_in_form_image'];
 
 			update_option('tce_disclaimer_option', $disclaimer);
 			update_option('user_form_header_text', $user_form_header_text);
 			update_option('user_form_header_image', $user_form_header_image);
 			update_option('estimator_header_text', $estimator_header_text);
 			update_option('estimator_header_image', $estimator_header_image);
+			update_option('estimate_in_form_image', $estimate_in_form_image);
 		}
     }
 	?>
@@ -185,8 +184,10 @@ function get_field_list(){
 			<label>User Info Image: <input type="text" name="user_form_header_image" value="<?php echo get_option('user_form_header_image'); ?>"></label><br>
 			<label>Estimator Greetings:</label><br>
 			<textarea name="estimator_header_text" rows="5"><?php echo get_option('estimator_header_text'); ?></textarea><br>
-			<label>Estimator Image: <input type="text" name="estimator_header_image" value="<?php echo get_option('estimator_header_image'); ?>"></label><br>
+			<label>Estimator Header Image: <input type="text" name="estimator_header_image" value="<?php echo get_option('estimator_header_image'); ?>"></label><br>
+			<label>Estimator Form Image: <input type="text" name="estimate_in_form_image" value="<?php echo get_option('estimate_in_form_image'); ?>"></label><br>
             <input class="tce-button tce-button-info" type="submit" name="tce_update_settings" value="Update Settings">
+			
         </form>
 
         <h3>Fields</h3>
