@@ -74,6 +74,11 @@ function tce_get_style(){
 			width:100%;
 			margin: 5px 0px 10px 0px;
 			border: 1px solid #a5a5a5;
+			color:black;
+		}
+
+		input::placeholder{
+			color:#bababa;
 		}
 
 		.tce-form input[type="radio"]{
@@ -152,7 +157,7 @@ function tce_get_script(){
 		document.addEventListener('DOMContentLoaded', function() {
 			var tce_checkboxes = document.querySelectorAll('.tce_value_checkbox');
 			function toggle_value_checkboxes(event){
-				var checkbox = event.target;
+				var checkbox = event.tarPOST;
 				if(checkbox.checked){
 					// Pass this checkbox.value to a php function called add_value
 				}else{
@@ -310,7 +315,7 @@ function tce_user_info_form(){
 			<img src="<?php echo $user_form_header_image; ?>">
 		</div>
 	</div>
-	<form class="tce-form top-black-line" action="" method="GET">
+	<form class="tce-form top-black-line" action="" method="POST">
         <input type="text" id="tce_name" name="tce_name" placeholder="이름" required>
         <input type="email" id="tce_email" name="tce_email" placeholder="연락처" required>
 
@@ -329,7 +334,7 @@ function tce_user_info_form(){
 			?>
 		</select>
         <div class="tce-form-button-div">
-			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tcepage" value="getquote">견적문의신청하기</button>&nbsp;
+			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tcepage" value="POSTquote">견적문의신청하기</button>&nbsp;
 			</form><form style="display:inline;">
 			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tcepage" value="quotelist">신청목록보기</button></form>
 		</div>
@@ -349,7 +354,7 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 
 	global $wpdb;
 	$table_user_info = $wpdb->prefix . "eg_tce_user_info";
-	$user_info = $wpdb->get_row("SELECT * FROM $table_user_info WHERE id = $tce_user_id");
+	$user_info = $wpdb->POST_row("SELECT * FROM $table_user_info WHERE id = $tce_user_id");
 
 	if($tce_user_allowed == false){
 		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -385,22 +390,19 @@ function tce_calculator(){
 	$output = '';
 	$output .= tce_get_style();
 	$output .= tce_get_script();
-	if(isset($_GET['tcepage'])){
-		if($_GET['tcepage'] == 'getquote'){
-			$name = isset($_GET['tce_name']) ? $_GET['tce_name'] : '';
-			$email = isset($_GET['tce_email']) ? $_GET['tce_email'] : '';
-			$gender = isset($_GET['tce_gender'])? $_GET['tce_gender'] : '';
-			$year = isset($_GET['tce_year']) ? $_GET['tce_year'] : 0;
+	if(isset($_POST['tcepage'])){
+		if($_POST['tcepage'] == 'POSTquote'){
+			$name = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
+			$email = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
+			$gender = isset($_POST['tce_gender'])? $_POST['tce_gender'] : '';
+			$year = isset($_POST['tce_year']) ? $_POST['tce_year'] : 0;
 			if(!empty($name)&&!empty($email)&&!empty($gender)&&!empty($year)){
 				return $output . tce_cost_estimator($name, $email, $gender, $year);
 			}
 			return $output . tce_user_info_form();
-		}else if($_GET['tcepage'] == 'quotelist'){
+		}else if($_POST['tcepage'] == 'quotelist'){
 			return $output . tce_quote_list();
-		}
-		return $output . tce_user_info_form();
-	}else if(isset($_POST['tcepage'])){
-		if($_POST['tcepage'] == 'savequote'){
+		}else if($_POST['tcepage'] == 'savequote'){
 			$name = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
 			$password = isset($_POST['tce_password']) ? $_POST['tce_password'] : '';
 			$email = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
@@ -433,10 +435,13 @@ function tce_calculator(){
 				if($result){
 					$qoute_id = $wpdb->insert_id;
 					return "Data Inserted with ID: " . $qoute_id;
+				}else{
+					return $output . tce_cost_estimator($name, $email, $gender, $year);
 				}
 			}
 			return $output . tce_cost_estimator($name, $email, $gender, $year);
 		}
+		return $output . tce_user_info_form();
 	}
 	return $output . tce_user_info_form();
 }
