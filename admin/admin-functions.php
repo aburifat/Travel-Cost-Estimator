@@ -182,7 +182,7 @@ function get_field_list(){
 			<label>User Info Greetings:</label><br>
 			<textarea name="user_form_header_text" rows="5"><?php echo get_option('user_form_header_text'); ?></textarea><br>
 			<label>User Info Image: <input type="text" name="user_form_header_image" value="<?php echo get_option('user_form_header_image'); ?>"></label><br>
-			<label>Estimator Greetings:</label><br>
+			<label>Estimator Greetings: You can use <b>[name], [email], [gender] and [year]</b> to load dynamic information</label><br>
 			<textarea name="estimator_header_text" rows="5"><?php echo get_option('estimator_header_text'); ?></textarea><br>
 			<label>Estimator Header Image: <input type="text" name="estimator_header_image" value="<?php echo get_option('estimator_header_image'); ?>"></label><br>
 			<label>Estimator Form Image: <input type="text" name="estimate_in_form_image" value="<?php echo get_option('estimate_in_form_image'); ?>"></label><br>
