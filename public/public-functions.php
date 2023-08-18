@@ -131,6 +131,15 @@ function tce_get_style(){
 			width:100%;
 		}
 
+		.estimate_table, .estimate_table td, .estimate_table th{
+			text-align:center;
+			border-color:#bfbfbf;
+		}
+
+		.estimate_table th{
+			background-color:#F0F0F0;
+		}
+
 		@media (max-width:767px){
 			.tce-form-header{
 				display:block;
@@ -184,166 +193,6 @@ function is_valid_image($image_url){
 	return false;
 }
 
-function tce_cost_estimator($name, $email, $gender, $year){
-	ob_start();
-
-	global $wpdb;
-	$table_fields = $wpdb->prefix . "eg_tce_fields";
-	$table_values = $wpdb->prefix . "eg_tce_values";
-	$disclaimer = get_option('tce_disclaimer_option');
-	$fields = $wpdb->get_results("SELECT * FROM $table_fields");
-
-	$estimator_header_text = get_option('estimator_header_text');
-	$estimator_header_image = get_option('estimator_header_image');
-	$estimate_in_form_image = get_option('estimate_in_form_image');
-
-	$estimator_header_text = str_replace("[name]", $name, $estimator_header_text);
-	$estimator_header_text = str_replace("[email]", $email, $estimator_header_text);
-	$estimator_header_text = str_replace("[gender]", $gender, $estimator_header_text);
-	$estimator_header_text = str_replace("[year]", $year, $estimator_header_text);
-	
-	?>
-	<div class="tce-form-header">
-		<div class="tce-form-header-text">
-			<?php echo $estimator_header_text; ?>
-		</div>
-		<div class="tce-form-header-image">
-			<img src="<?php echo $estimator_header_image; ?>">
-		</div>
-	</div>
-	<textarea class="top-black-line" name="disclaimer" rows="10" readonly><?php echo $disclaimer; ?></textarea>
-	<form class="tce-form" action="" method="POST">
-		<span style="padding:5px 0px 10px 0px;display:block;">개인정보취급방침에 동의하셔야 견적을 진행하실 수 있습니다. <input type="checkbox" class="tce_value_checkbox" name="tce_toc_agreement" id="pp_agreed" value="Agreed" required></span>
-		<div class="tce-form-header">
-			<div class="tce-in-form-image">
-			<img src="<?php echo $estimate_in_form_image; ?>">
-			</div>
-			<div class="tce-login-form">
-				<input type="text" id="tce_name" name="tce_name" placeholder="이름" value="<?php echo $name; ?>" required>
-				<input type="password" id="tce_password" name="tce_password" placeholder="비밀번호" required>
-				<input type="email" id="tce_email" name="tce_email" placeholder="연락처" value="<?php echo $email; ?>" required>
-
-				<label for="tce_gender">성별:</label>
-				<span>남</span>
-				<input type="radio" name="tce_gender" value="남" required <?php if($gender == "남")echo "checked" ?>>
-				<span>여</span>
-				<input type="radio" name="tce_gender" value="여" required <?php if($gender == "여")echo "checked" ?>><br>
-				
-				<select name="tce_year" required>
-					<option value="">나이</option>
-					<?php
-					for($i=1950;$i<=2005;$i++){
-						if($year == $i)
-							echo '<option value='. $i .' selected>' . $i . '</option>';
-						else
-						echo '<option value='. $i .'>' . $i . '</option>';
-					}
-					?>
-				</select>
-				<input type="text" id="tce_contant_no" name="tce_contant_no" placeholder="연락처(010-0000-0000)" required>
-			</div>
-		</div>
-		<?php
-		foreach($fields as $field){
-			?>
-			<div class="field_title" id="field_<?php echo $field->id; ?>">
-				<?php
-					echo $field->name;
-					if($field->is_required == 1){
-						echo ' <span class="text_alert">(필수)</span>';
-					}
-				?>
-			</div>
-			<div class="field_values" id="field_id_<?php echo $field->id; ?>">
-				<?php
-				if(is_valid_image($field->feature_image)){
-					?>
-					<div class="field_feature_image"><img class="tce_image_feature" src="<?php echo $field->feature_image; ?>"></div>
-					<?php
-				}
-				?>
-				<div>
-					<?php
-						$values = $wpdb->get_results("SELECT * FROM $table_values WHERE field_id = $field->id");
-						foreach($values as $value){
-							?>
-							<div style="display:inline-block;padding:0px 10px;">
-								<?php
-								if($field->value_type == 2){
-									?>
-									<img class="tce_image" src="<?php echo $value->image; ?>"><br>
-									<?php
-								}
-								?>
-								<div style="text-align:center;">
-								<input type="checkbox" class="tce_value_checkbox" name="value_id_<?php echo $value->id; ?>" id="value_id_<?php echo $value->id; ?>" value="<?php echo $value->price; ?>">
-								<label for="value_id_<?php echo $value->id; ?>"><?php echo $value->text; ?></label>
-								</div>
-							</div>
-						<?php
-						}
-					?>
-				</div>
-				
-			</div>
-			<div>
-				<br><span class="tce_notice <?php echo ($field->notice_type==1)?'text_info':'text_alert' ?>"><?php echo $field->notice; ?></span>
-			</div>
-			
-		<?php } ?>
-		<div class="tce-form-button-div">
-			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tcepage" value="savequote">견적저장</button>&nbsp;
-			</form><form action="" method="POST" style="display:inline;" >
-			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit">처음으로</button></form>
-		</div>
-	<?php
-	return ob_get_clean();
-}
-
-function tce_user_info_form(){
-	ob_start();
-	?>
-	<?php
-		$user_form_header_text = get_option('user_form_header_text');
-		$user_form_header_image = get_option('user_form_header_image');
-	?>
-	<div class="tce-form-header">
-		<div class="tce-form-header-text">
-			<?php echo $user_form_header_text; ?>
-		</div>
-		<div class="tce-form-header-image">
-			<img src="<?php echo $user_form_header_image; ?>">
-		</div>
-	</div>
-	<form class="tce-form top-black-line" action="" method="POST">
-        <input type="text" id="tce_name" name="tce_name" placeholder="이름" required>
-        <input type="email" id="tce_email" name="tce_email" placeholder="연락처" required>
-
-		<label for="tce_gender">성별:</label>
-		<span>남</span>
-		<input type="radio" name="tce_gender" value="남" required>
-		<span>여</span>
-		<input type="radio" name="tce_gender" value="여" required><br>
-        
-		<select name="tce_year" required>
-			<option value="">나이</option>
-			<?php
-			for($i=1950;$i<=2005;$i++){
-				echo '<option value='. $i .'>' . $i . '</option>';
-			}
-			?>
-		</select>
-        <div class="tce-form-button-div">
-			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tcepage" value="POSTquote">견적문의신청하기</button>&nbsp;
-			</form><form style="display:inline;">
-			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tcepage" value="quotelist">신청목록보기</button></form>
-		</div>
-        
-    
-	<?php
-	return ob_get_clean();
-}
-
 function tce_quote_list(){
 	return "Quote List Part";
 }
@@ -384,67 +233,324 @@ function tce_single_quote(){ //have to pass the $tce_user_id
 	return ob_get_clean();
 }
 
-function tce_calculator(){
+function tce_fetch_data(){
+    global $wpdb;
+
+    $data = array();
+    $data['page'] = isset($_POST['tce_page']) ? $_POST['tce_page'] : '';
+    $data['quote_id'] = isset($_POST['quote_id']) ? $_POST['quote_id'] : '';
+    $data['name'] = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
+    $data['email'] = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
+    $data['gender'] = isset($_POST['tce_gender'])? $_POST['tce_gender'] : '';
+    $data['year'] = isset($_POST['tce_year']) ? $_POST['tce_year'] : 0;
+    $data['password'] = isset($_POST['tce_password']) ? $_POST['tce_password'] : '';
+    $data['contact_no'] = isset($_POST['tce_contant_no']) ? $_POST['tce_contant_no'] : '';
+
+    $data['table_fields'] = $wpdb->prefix . "eg_tce_fields";
+    $data['table_values'] = $wpdb->prefix . "eg_tce_values";
+    $data['table_quote_info'] = $wpdb->prefix . "eg_tce_quote_info";
+    $data['table_quote_values'] = $wpdb->prefix . "eg_tce_quote_values";
+    $data['table_tokens'] = $wpdb->prefix . "eg_tce_tokens";
+
+    $data['style'] = tce_get_style();
+    $data['script'] = tce_get_script();
+
+    return $data;
+}
+
+function tce_user_info_form($data){
+	ob_start();
+	?>
+	<?php
+		$user_form_header_text = get_option('user_form_header_text');
+		$user_form_header_image = get_option('user_form_header_image');
+	?>
+	<div class="tce-form-header">
+		<div class="tce-form-header-text">
+			<?php echo $user_form_header_text; ?>
+		</div>
+		<div class="tce-form-header-image">
+			<img src="<?php echo $user_form_header_image; ?>">
+		</div>
+	</div>
+	<form class="tce-form top-black-line" action="" method="POST">
+        <input type="text" id="tce_name" name="tce_name" placeholder="이름" required>
+        <input type="email" id="tce_email" name="tce_email" placeholder="연락처" required>
+
+		<label for="tce_gender">성별:</label>
+		<span>남</span>
+		<input type="radio" name="tce_gender" value="남" required>
+		<span>여</span>
+		<input type="radio" name="tce_gender" value="여" required><br>
+        
+		<select name="tce_year" required>
+			<option value="">나이</option>
+			<?php
+			for($i=1950;$i<=2005;$i++){
+				echo '<option value='. $i .'>' . $i . '</option>';
+			}
+			?>
+		</select>
+        <div class="tce-form-button-div">
+			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tce_page" value="getquote">견적문의신청하기</button>&nbsp;
+			</form><form style="display:inline;">
+			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="quotelist">신청목록보기</button></form>
+		</div>
+        
+    
+	<?php
+	echo ob_get_clean();
+}
+
+function tce_cost_estimator($data){
+	ob_start();
+
 	global $wpdb;
 
-	$output = '';
-	$output .= tce_get_style();
-	$output .= tce_get_script();
-	if(isset($_POST['tcepage'])){
-		if($_POST['tcepage'] == 'POSTquote'){
-			$name = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
-			$email = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
-			$gender = isset($_POST['tce_gender'])? $_POST['tce_gender'] : '';
-			$year = isset($_POST['tce_year']) ? $_POST['tce_year'] : 0;
-			if(!empty($name)&&!empty($email)&&!empty($gender)&&!empty($year)){
-				return $output . tce_cost_estimator($name, $email, $gender, $year);
-			}
-			return $output . tce_user_info_form();
-		}else if($_POST['tcepage'] == 'quotelist'){
-			return $output . tce_quote_list();
-		}else if($_POST['tcepage'] == 'savequote'){
-			$name = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
-			$password = isset($_POST['tce_password']) ? $_POST['tce_password'] : '';
-			$email = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
-			$gender = isset($_POST['tce_gender'])? $_POST['tce_gender'] : '';
-			$year = isset($_POST['tce_year']) ? $_POST['tce_year'] : 0;
-			$contact_no = isset($_POST['tce_contant_no']) ? $_POST['tce_contant_no'] : '';
-			if(!empty($name)&&!empty($email)&&!empty($gender)&&!empty($year)){
-				$tce_value_ids = [];
-				$table_values = $wpdb->prefix . "eg_tce_values";
-				$values = $wpdb->get_results("SELECT * FROM $table_values");
+	$disclaimer = get_option('tce_disclaimer_option');
+	$fields = $wpdb->get_results("SELECT * FROM " . $data['table_fields']);
 
-				foreach($values as $value){
-					if(!isset($_POST['value_id_'.$value->id])){
-						$tce_value_ids.push($value->id);
+	$estimator_header_text = get_option('estimator_header_text');
+	$estimator_header_image = get_option('estimator_header_image');
+	$estimate_in_form_image = get_option('estimate_in_form_image');
+
+	$estimator_header_text = str_replace("[name]", $data['name'], $estimator_header_text);
+	$estimator_header_text = str_replace("[email]", $data['email'], $estimator_header_text);
+	$estimator_header_text = str_replace("[gender]", $data['gender'], $estimator_header_text);
+	$estimator_header_text = str_replace("[year]", $data['year'], $estimator_header_text);
+	
+	?>
+	<div class="tce-form-header">
+		<div class="tce-form-header-text">
+			<?php echo $estimator_header_text; ?>
+		</div>
+		<div class="tce-form-header-image">
+			<img src="<?php echo $estimator_header_image; ?>">
+		</div>
+	</div>
+	<textarea class="top-black-line" name="disclaimer" rows="10" readonly><?php echo $disclaimer; ?></textarea>
+	<form class="tce-form" action="" method="POST">
+		<span style="padding:5px 0px 10px 0px;display:block;">개인정보취급방침에 동의하셔야 견적을 진행하실 수 있습니다. <input type="checkbox" class="tce_value_checkbox" name="tce_toc_agreement" id="pp_agreed" value="Agreed" required></span>
+		<div class="tce-form-header">
+			<div class="tce-in-form-image">
+			<img src="<?php echo $estimate_in_form_image; ?>">
+			</div>
+			<div class="tce-login-form">
+				<input type="text" id="tce_name" name="tce_name" placeholder="이름" value="<?php echo $data['name']; ?>" required>
+				<input type="password" id="tce_password" name="tce_password" placeholder="비밀번호" required>
+				<input type="email" id="tce_email" name="tce_email" placeholder="연락처" value="<?php echo $data['email']; ?>" required>
+
+				<label for="tce_gender">성별:</label>
+				<span>남</span>
+				<input type="radio" name="tce_gender" value="남" required <?php if($data['gender'] == "남")echo "checked" ?>>
+				<span>여</span>
+				<input type="radio" name="tce_gender" value="여" required <?php if($data['gender'] == "여")echo "checked" ?>><br>
+				
+				<select name="tce_year" required>
+					<option value="">나이</option>
+					<?php
+					for($i=1950;$i<=2005;$i++){
+						if($data['year'] == $i)
+							echo '<option value='. $i .' selected>' . $i . '</option>';
+						else
+						echo '<option value='. $i .'>' . $i . '</option>';
 					}
+					?>
+				</select>
+				<input type="text" id="tce_contant_no" name="tce_contant_no" placeholder="연락처(010-0000-0000)" value="<?php echo $data['contact_no']; ?>" required>
+			</div>
+		</div>
+		<?php
+		foreach($fields as $field){
+			?>
+			<div class="field_title" id="field_title_<?php echo $field->id; ?>">
+				<?php
+					echo $field->name;
+					if($field->is_required == 1){
+						echo ' <span class="text_alert">(필수)</span>';
+					}
+				?>
+			</div>
+			<div class="field_values" id="field_values_<?php echo $field->id; ?>">
+				<?php
+				if(is_valid_image($field->feature_image)){
+					?>
+					<div class="field_feature_image"><img class="tce_image_feature" src="<?php echo $field->feature_image; ?>"></div>
+					<?php
 				}
-				$table_user_info = $wpdb->prefix . "eg_tce_user_info";
-				$result = $wpdb->insert(
-					$table_user_info,
-					array(
-						'name' => $name,
-						'password' => md5($password),
-						'email' => $email,
-						'gender' => $gender,
-						'year' => $year,
-						'contact_no' => $contact_no,
-					)
-				);
+				?>
+				<div class="values">
+					<?php
+						$values = $wpdb->get_results("SELECT * FROM " . $data['table_values'] ." WHERE field_id = $field->id");
+						foreach($values as $value){
+							?>
+							<div style="display:inline-block;padding:0px 10px;">
+								<?php
+								if($field->value_type == 2){
+									?>
+									<img class="tce_image" src="<?php echo $value->image; ?>"><br>
+									<?php
+								}
+								?>
+								<div style="text-align:center;">
+								<input type="checkbox" class="tce_value_checkbox" name="value_<?php echo $value->id; ?>" id="value_<?php echo $value->id; ?>" value="<?php echo $value->price; ?>">
+								<label for="value_<?php echo $value->id; ?>"><?php echo $value->text; ?></label>
+								</div>
+							</div>
+						<?php
+						}
+					?>
+				</div>
+			</div>
+			<div>
+				<br><span class="tce_notice <?php echo ($field->notice_type==1)?'text_info':'text_alert' ?>"><?php echo $field->notice; ?></span>
+			</div>
+			
+		<?php } ?>
+		<br>
+		<table class="estimate_table">
+			<tr>
+				<th>견적내용</th>
+				<th>견적금액</th>
+			</tr>
 
-				if($result){
-					$qoute_id = $wpdb->insert_id;
-					return "Data Inserted with ID: " . $qoute_id;
-				}else{
-					return $output . tce_cost_estimator($name, $email, $gender, $year);
+			<?php
+				$values = $wpdb->get_results("SELECT * FROM " . $data['table_values']);
+				foreach($values as $value){
+					?>
+						<tr class="estimate_row" id="row_<?php echo $value->id; ?>">
+							<td class="estimate_name" id="estimate_text_<?php echo $value->id; ?>"><?php echo $value->text; ?></td>
+							<td class="estimate_price" id="estimate_price_<?php echo $value->id; ?>"><?php echo $value->price; ?></td>
+						</tr>
+					<?php
 				}
-			}
-			return $output . tce_cost_estimator($name, $email, $gender, $year);
-		}
-		return $output . tce_user_info_form();
-	}
-	return $output . tce_user_info_form();
+			?>
+
+			<tr>
+				<td><b>총견적금액(+)</b></td>
+				<td><span class="estimate_total_price" style="color:red;">0</span> $(달러)</td>
+			</tr>
+		</table>
+		<div class="tce-form-button-div">
+			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tce_page" value="savequote">견적저장</button>&nbsp;
+			</form><form action="" method="POST" style="display:inline;" >
+			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="init">처음으로</button></form>
+		</div>
+	<?php
+	echo ob_get_clean();
 }
+
+function tce_get_visitor_ip(){
+	return $_SERVER['REMOTE_ADDR'];
+}
+
+function tce_is_authenticated($data){
+    global $wpdb;
+
+    $token = $wpdb->get_row("SELECT * FROM " . $data['table_tokens'] . " WHERE quote_id = " . $data['quote_id']);
+    $visitor_ip = tce_get_visitor_ip();
+    
+    if(md5($visitor_ip) == $token->visitor_ip){
+        return true;
+    }
+    
+    return false;
+}
+
+
+function tce_save_quote($data){
+    global $wpdb;
+
+    $values = $wpdb->get_results("SELECT * FROM " . $data['table_values']);
+    $value_ids = array();
+
+    foreach($values as $value){
+        $value_key = 'value_' . $value->id;
+        if(isset($_POST[$value_key]) && $_POST[$value_key] == 'on'){
+            $value_ids[] = $value->id;
+        }
+    }
+
+    $result = $wpdb->insert(
+        $data['table_user_info'],
+        array(
+            'name' => $data['name'],
+            'password' => md5($data['password']),
+            'email' => $data['email'],
+            'gender' => $data['gender'],
+            'year' => $data['year'],
+            'contact_no' => $data['contact_no'],
+        )
+    );
+
+    if($result){
+        $quote_id = $wpdb->insert_id;
+
+        foreach($value_ids as $value_id){
+            $wpdb->insert(
+                $data['table_user_info'],
+                array(
+                    'quote_id' => $quote_id,
+                    'value_id' => $value_id
+                )
+            );
+        }
+    }else{
+        echo '<span style="color:red;">Error Saving Quote!</span>';
+    }
+}
+
+
+function tce_delete_quote($data){
+    global $wpdb;
+
+    $result_values = $wpdb->delete($data['table_quote_values'], array('quote_id' => $data['quote_id']), array('%d'));
+    $result_info = $wpdb->delete($data['table_quote_info'], array('id' => $data['quote_id']), array('%d'));
+
+    if($result_values === false || $result_info === false){
+        echo '<span style="color:red;">Error Deleting Quote!</span>';
+    }else{
+        echo '<span style="color:green;">Quote Deleted Successfully!</span>';
+    }
+}
+
+
+function tce_calculator(){
+    $data = tce_fetch_data();
+    echo $data['style'];
+
+    switch($data['page']){
+        case 'init':
+            tce_user_info_form($data);
+            break;
+        case 'getquote':
+            tce_cost_estimator($data);
+            break;
+        case 'quotelist':
+            tce_quote_list($data);
+            break;
+        case 'singlequote':
+            if(tce_is_authenticated($data)){
+                tce_single_quote($data);
+            } else {
+                tce_authenticate($data);
+            }
+            break;
+        case 'savequote':
+            tce_save_quote($data);
+            tce_quote_list($data);
+            break;
+        case 'deletequote':
+            tce_delete_quote($data);
+            tce_quote_list($data);
+            break;
+        default:
+            tce_user_info_form($data);
+    }
+
+    echo $data['script'];
+}
+
 
 add_shortcode('tce_calculator', 'tce_calculator');
 

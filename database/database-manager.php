@@ -1,6 +1,7 @@
 <?php
 function eg_tce_DB_check(){
 	global $wpdb;
+	//Fields Table
 	if(eg_tce_table_not_exists("eg_tce_fields")){
 		$table = $wpdb->prefix . "eg_tce_fields";
 		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
@@ -15,6 +16,7 @@ function eg_tce_DB_check(){
 			PRIMARY KEY (id)
 		) "));
 	}
+	//Values Table
 	if(eg_tce_table_not_exists("eg_tce_values")){
 		$table = $wpdb->prefix . "eg_tce_values";
 		$table_fields = $wpdb->prefix . "eg_tce_fields";
@@ -28,8 +30,9 @@ function eg_tce_DB_check(){
 			FOREIGN KEY (field_id) REFERENCES " . $table_fields . "(id)
 		) "));
 	}
-	if(eg_tce_table_not_exists("eg_tce_user_info")){
-		$table = $wpdb->prefix . "eg_tce_user_info";
+	//Quote Info Table
+	if(eg_tce_table_not_exists("eg_tce_quote_info")){
+		$table = $wpdb->prefix . "eg_tce_quote_info";
 		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255),
@@ -41,16 +44,30 @@ function eg_tce_DB_check(){
 			PRIMARY KEY (id)
 		) "));
 	}
-	if(eg_tce_table_not_exists("eg_tce_user_estimator")){
-		$table = $wpdb->prefix . "eg_tce_user_estimator";
-		$table_users = $wpdb->prefix . "eg_tce_user_info";
+	//Quote Values Table
+	if(eg_tce_table_not_exists("eg_tce_quote_values")){
+		$table = $wpdb->prefix . "eg_tce_quote_values";
+		$table_quote_info = $wpdb->prefix . "eg_tce_quote_info";
+		$table_values = $wpdb->prefix . "eg_tce_values";
 		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			user_id mediumint(9) NOT NULL,
-			text text,
-			price int,
+			quote_id mediumint(9) NOT NULL,
+			value_id mediumint(9) NOT NULL,
 			PRIMARY KEY (id),
-			FOREIGN KEY (user_id) REFERENCES " . $table_users . "(id)
+			FOREIGN KEY (quote_id) REFERENCES " . $table_quote_info . "(id),
+			FOREIGN KEY (value_id) REFERENCES " . $table_values . "(id)
+		) "));
+	}
+	//Authentication Table
+	if(eg_tce_table_not_exists("eg_tce_tokens")){
+		$table = $wpdb->prefix . "eg_tce_tokens";
+		$table_quote_info = $wpdb->prefix . "eg_tce_quote_info";
+		$wpdb->query($wpdb->prepare("CREATE TABLE " . $table . "(
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			quote_id mediumint(9) NOT NULL,
+			visitor_ip varchar(50),
+			PRIMARY KEY (id),
+			FOREIGN KEY (quote_id) REFERENCES " . $table_quote_info . "(id)
 		) "));
 	}
 }
