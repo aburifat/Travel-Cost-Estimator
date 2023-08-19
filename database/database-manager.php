@@ -1,6 +1,7 @@
 <?php
 function eg_tce_DB_check(){
 	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
 	//Fields Table
 	if(eg_tce_table_not_exists("eg_tce_fields")){
 		$table = $wpdb->prefix . "eg_tce_fields";
@@ -14,7 +15,7 @@ function eg_tce_DB_check(){
 			value_type int,
 			is_required int,
 			PRIMARY KEY (id)
-		) "));
+		) " . $charset_collate));
 	}
 	//Values Table
 	if(eg_tce_table_not_exists("eg_tce_values")){
@@ -28,7 +29,7 @@ function eg_tce_DB_check(){
 			price int,
 			PRIMARY KEY (id),
 			FOREIGN KEY (field_id) REFERENCES " . $table_fields . "(id)
-		) "));
+		) " . $charset_collate));
 	}
 	//Quote Info Table
 	if(eg_tce_table_not_exists("eg_tce_quote_info")){
@@ -42,7 +43,7 @@ function eg_tce_DB_check(){
 			year int,
 			contact_no varchar(20),
 			PRIMARY KEY (id)
-		) "));
+		) " . $charset_collate));
 	}
 	//Quote Values Table
 	if(eg_tce_table_not_exists("eg_tce_quote_values")){
@@ -56,7 +57,7 @@ function eg_tce_DB_check(){
 			PRIMARY KEY (id),
 			FOREIGN KEY (quote_id) REFERENCES " . $table_quote_info . "(id),
 			FOREIGN KEY (value_id) REFERENCES " . $table_values . "(id)
-		) "));
+		) " . $charset_collate));
 	}
 	//Authentication Table
 	if(eg_tce_table_not_exists("eg_tce_tokens")){
@@ -68,7 +69,7 @@ function eg_tce_DB_check(){
 			visitor_ip varchar(50),
 			PRIMARY KEY (id),
 			FOREIGN KEY (quote_id) REFERENCES " . $table_quote_info . "(id)
-		) "));
+		) " . $charset_collate));
 	}
 }
 
