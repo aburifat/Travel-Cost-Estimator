@@ -441,6 +441,9 @@ function tce_quote_list($data){
 			}
 		?>
 	</table>
+	<form style="text-align:right;">
+		<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="init">견적신청하기</button>
+	</form>
 	<?php
 
 	echo ob_get_clean();
@@ -451,7 +454,12 @@ function tce_get_visitor_ip(){
 }
 
 function tce_is_authenticated($data){
+
     global $wpdb;
+
+	if (current_user_can('administrator')) {
+        return true;
+    }
 
     $token = $wpdb->get_row("SELECT * FROM " . $data['table_tokens'] . " WHERE quote_id = " . $data['quote_id']);
     $visitor_ip = tce_get_visitor_ip();
@@ -637,7 +645,7 @@ function tce_delete_quote($data){
 			redirectButton.click();
 		</script>
 	<?php
-	
+
 	echo ob_get_clean();
 }
 
