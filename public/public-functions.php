@@ -140,6 +140,10 @@ function tce_get_style(){
 			background-color:#F0F0F0;
 		}
 
+		.hidden{
+			display: none !important;
+		}
+
 		@media (max-width:767px){
 			.tce-form-header{
 				display:block;
@@ -164,13 +168,22 @@ function tce_get_script(){
 	?>
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
-			var tce_checkboxes = document.querySelectorAll('.tce_value_checkbox');
+			const tce_checkboxes = document.querySelectorAll('.tce_value_checkbox');
+			const tce_total_price = document.querySelector('.estimate_total_price');
 			function toggle_value_checkboxes(event){
-				var checkbox = event.tarPOST;
+				var checkbox = event.target;
+				const row_id = "row_" + checkbox.name.match(/value_(\d+)/)[1];
+				const estimate_row = document.getElementById(row_id);
+				var total_price = parseInt(tce_total_price.textContent);
+				
 				if(checkbox.checked){
-					// Pass this checkbox.value to a php function called add_value
+					estimate_row.classList.remove("hidden");
+					total_price += parseInt(checkbox.value);
+					tce_total_price.textContent = total_price;
 				}else{
-					// Pass this checkbox.value to a php function called remove_value
+					estimate_row.classList.add("hidden");
+					total_price -= parseInt(checkbox.value);
+					tce_total_price.textContent = total_price;
 				}
 			}
 			tce_checkboxes.forEach(function(checkbox) {
@@ -193,58 +206,18 @@ function is_valid_image($image_url){
 	return false;
 }
 
-function tce_quote_list(){
-	return "Quote List Part";
-}
-
-function tce_single_quote(){ //have to pass the $tce_user_id
-	$tce_user_id = 1;
-	ob_start();
-
-	global $wpdb;
-	$table_user_info = $wpdb->prefix . "eg_tce_user_info";
-	$user_info = $wpdb->POST_row("SELECT * FROM $table_user_info WHERE id = $tce_user_id");
-
-	if($tce_user_allowed == false){
-		if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-			if (isset($_POST['check_user_password'])) {
-				$user_password = sanitize_text_field($_POST['user_password']);
-				$hashed_password = md5($user_password);
-				if($hashed_password == $user_info->password){
-
-				}
-			}
-		}
-	}
-
-	if($tce_user_allowed == false){
-		?>
-		<form action="" method="POST">
-			<label for="user_password">Password:</label>
-			<input type="password" id="user_password" name="user_password" required><br><br>
-			
-			<input type="submit" name="check_user_password" value="Submit">
-		</form>
-		<?php
-	}else{
-		echo "Wow!";
-	}
-
-	return ob_get_clean();
-}
-
 function tce_fetch_data(){
     global $wpdb;
 
     $data = array();
-    $data['page'] = isset($_POST['tce_page']) ? $_POST['tce_page'] : '';
-    $data['quote_id'] = isset($_POST['quote_id']) ? $_POST['quote_id'] : '';
-    $data['name'] = isset($_POST['tce_name']) ? $_POST['tce_name'] : '';
-    $data['email'] = isset($_POST['tce_email']) ? $_POST['tce_email'] : '';
-    $data['gender'] = isset($_POST['tce_gender'])? $_POST['tce_gender'] : '';
-    $data['year'] = isset($_POST['tce_year']) ? $_POST['tce_year'] : 0;
-    $data['password'] = isset($_POST['tce_password']) ? $_POST['tce_password'] : '';
-    $data['contact_no'] = isset($_POST['tce_contant_no']) ? $_POST['tce_contant_no'] : '';
+    $data['page'] = isset($_GET['tce_page']) ? $_GET['tce_page'] : '';
+    $data['quote_id'] = isset($_GET['quote_id']) ? $_GET['quote_id'] : '';
+    $data['name'] = isset($_GET['tce_name']) ? $_GET['tce_name'] : '';
+    $data['email'] = isset($_GET['tce_email']) ? $_GET['tce_email'] : '';
+    $data['gender'] = isset($_GET['tce_gender'])? $_GET['tce_gender'] : '';
+    $data['year'] = isset($_GET['tce_year']) ? $_GET['tce_year'] : 0;
+    $data['password'] = isset($_GET['tce_password']) ? $_GET['tce_password'] : '';
+    $data['contact_no'] = isset($_GET['tce_contant_no']) ? $_GET['tce_contant_no'] : '';
 
     $data['table_fields'] = $wpdb->prefix . "eg_tce_fields";
     $data['table_values'] = $wpdb->prefix . "eg_tce_values";
@@ -273,7 +246,7 @@ function tce_user_info_form($data){
 			<img src="<?php echo $user_form_header_image; ?>">
 		</div>
 	</div>
-	<form class="tce-form top-black-line" action="" method="POST">
+	<form class="tce-form top-black-line" action="" method="GET">
         <input type="text" id="tce_name" name="tce_name" placeholder="이름" required>
         <input type="email" id="tce_email" name="tce_email" placeholder="연락처" required>
 
@@ -293,7 +266,7 @@ function tce_user_info_form($data){
 		</select>
         <div class="tce-form-button-div">
 			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tce_page" value="getquote">견적문의신청하기</button>&nbsp;
-			</form><form style="display:inline;">
+			</form><form style="display:inline;" action="" method="GET">
 			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="quotelist">신청목록보기</button></form>
 		</div>
         
@@ -329,8 +302,8 @@ function tce_cost_estimator($data){
 		</div>
 	</div>
 	<textarea class="top-black-line" name="disclaimer" rows="10" readonly><?php echo $disclaimer; ?></textarea>
-	<form class="tce-form" action="" method="POST">
-		<span style="padding:5px 0px 10px 0px;display:block;">개인정보취급방침에 동의하셔야 견적을 진행하실 수 있습니다. <input type="checkbox" class="tce_value_checkbox" name="tce_toc_agreement" id="pp_agreed" value="Agreed" required></span>
+	<form class="tce-form" action="" method="GET">
+		<span style="padding:5px 0px 10px 0px;display:block;">개인정보취급방침에 동의하셔야 견적을 진행하실 수 있습니다. <input type="checkbox" class="tce_value_checkbox" required></span>
 		<div class="tce-form-header">
 			<div class="tce-in-form-image">
 			<img src="<?php echo $estimate_in_form_image; ?>">
@@ -418,7 +391,7 @@ function tce_cost_estimator($data){
 				$values = $wpdb->get_results("SELECT * FROM " . $data['table_values']);
 				foreach($values as $value){
 					?>
-						<tr class="estimate_row" id="row_<?php echo $value->id; ?>">
+						<tr class="estimate_row hidden" id="row_<?php echo $value->id; ?>">
 							<td class="estimate_name" id="estimate_text_<?php echo $value->id; ?>"><?php echo $value->text; ?></td>
 							<td class="estimate_price" id="estimate_price_<?php echo $value->id; ?>"><?php echo $value->price; ?></td>
 						</tr>
@@ -433,10 +406,43 @@ function tce_cost_estimator($data){
 		</table>
 		<div class="tce-form-button-div">
 			<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tce_page" value="savequote">견적저장</button>&nbsp;
-			</form><form action="" method="POST" style="display:inline;" >
+			</form><form action="" method="GET" style="display:inline;" >
 			<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="init">처음으로</button></form>
 		</div>
 	<?php
+	echo ob_get_clean();
+}
+
+function tce_quote_list($data){
+	
+	ob_start();
+
+	?>
+	<table class="estimate_table">
+		<tr>
+			<th>번호</th>
+			<th>제목</th>
+			<th>등록날짜</th>
+		</tr>
+
+		<?php
+			global $wpdb;
+			$quotes = $wpdb->get_results("SELECT id, name FROM " . $data['table_quote_info']);
+			$number_of_quotes = count($quotes);
+			foreach($quotes as $quote){
+				?>
+					<tr>
+						<td><?php echo $number_of_quotes--; ?></td>
+						<td>
+							<a href="?tce_page=singlequote&quote_id=<?php echo $quote->id;?>"><?php echo $quote->name; ?>**님의 여행견적서</a></td>
+						<td>2023-08-15</td>
+					</tr>
+				<?php
+			}
+		?>
+	</table>
+	<?php
+
 	echo ob_get_clean();
 }
 
@@ -457,8 +463,101 @@ function tce_is_authenticated($data){
     return false;
 }
 
+function tce_authenticate($data){
+	ob_start();
+	global $wpdb;
+	$quote = $wpdb->get_row("SELECT password FROM " . $data['table_quote_info'] . " WHERE id = " . $data['quote_id']);
+	$quote_pass = $quote->password;
+
+	if(isset($_GET['user_password'])){
+		$user_pass = md5($_GET['user_password']);
+		if($quote_pass == $user_pass){
+			?>
+			
+			
+			<?php
+			$result = $wpdb->insert(
+				$data['table_tokens'],
+				array(
+					'quote_id' => $data['quote_id'],
+					'visitor_ip' => md5(tce_get_visitor_ip()),
+				)
+			);
+		}
+	}
+
+	if(!tce_is_authenticated($data)){
+		?>
+		<div style="text-align:center;max-width:350px;width:100%;box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;">
+			<?php
+				$quote = $wpdb->get_row("SELECT name FROM " . $data['table_quote_info'] . " WHERE id = " . $data['quote_id']);
+			?>
+			<div style="padding:20px;">
+				<h4><?php echo $quote->name; ?>님 견적서</h4>
+				<h6 style="color:#3CA1FF;">비밀글 기능으로 보호된 글입니다.</h6>
+				<h6>작성자와 관리자만 열람하실 수 있습니다. 본인이라면 비밀번호를 입력하세요.</h6>
+			</div>
+			<hr style="margin:0px;">
+		
+			<form class="tce-form" action="" method="GET" style="max-width:350px;width:100%;padding:30px 20px;">
+				<input type="password" id="user_password" name="user_password" placeholder="비밀번호" required>
+				<input type="text" id="quote_id" name="quote_id" value="<?php echo $data['quote_id']; ?>" hidden>
+				<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="singlequote" style="width:100%;">확인</button>
+			</form>
+		</div>
+		<?php
+	}else{
+		tce_single_quote($data);
+	}
+	echo ob_get_clean();
+}
+
+function tce_single_quote($data){
+	ob_start();
+
+	global $wpdb;
+
+	?>
+	<table class="estimate_table">
+		<tr>
+			<th>견적내용</th>
+			<th>견적금액</th>
+		</tr>
+
+		<?php
+			$value_ids = $wpdb->get_results("SELECT value_id FROM " . $data['table_quote_values'] . " WHERE quote_id = " . $data['quote_id']);
+			$total_price = 0;
+			foreach($value_ids as $value_id){
+				$value = $wpdb->get_row("SELECT id, text, price FROM " . $data['table_values'] . " WHERE id = " . $value_id->value_id);
+				$total_price += $value->price;
+				?>
+					<tr class="estimate_row" id="row_<?php echo $value->id; ?>">
+						<td class="estimate_name" id="estimate_text_<?php echo $value->id; ?>"><?php echo $value->text; ?></td>
+						<td class="estimate_price" id="estimate_price_<?php echo $value->id; ?>"><?php echo $value->price; ?></td>
+					</tr>
+				<?php
+			}
+		?>
+
+		<tr>
+			<td><b>총견적금액(+)</b></td>
+			<td><span class="estimate_total_price" style="color:red;"><?php echo $total_price; ?></span> $(달러)</td>
+		</tr>
+	</table>
+	<form style="text-align:right;">
+		<input type="text" id="quote_id" name="quote_id" value="<?php echo $data['quote_id']; ?>" hidden>
+		<button class="tce_submit_button" id="tce_submit_button_red" type="submit" name="tce_page" value="deletequote">삭제</button>
+		<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="quotelist">목록</button>
+		<button class="tce_submit_button" id="tce_submit_button_gray" type="submit" name="tce_page" value="init">다시 견적내기</button>
+	</form>
+	<?php
+
+	echo ob_get_clean();
+}
+
 
 function tce_save_quote($data){
+	ob_start();
     global $wpdb;
 
     $values = $wpdb->get_results("SELECT * FROM " . $data['table_values']);
@@ -466,13 +565,13 @@ function tce_save_quote($data){
 
     foreach($values as $value){
         $value_key = 'value_' . $value->id;
-        if(isset($_POST[$value_key]) && $_POST[$value_key] == 'on'){
+        if(isset($_GET[$value_key])){
             $value_ids[] = $value->id;
         }
     }
 
     $result = $wpdb->insert(
-        $data['table_user_info'],
+        $data['table_quote_info'],
         array(
             'name' => $data['name'],
             'password' => md5($data['password']),
@@ -485,33 +584,61 @@ function tce_save_quote($data){
 
     if($result){
         $quote_id = $wpdb->insert_id;
-
         foreach($value_ids as $value_id){
             $wpdb->insert(
-                $data['table_user_info'],
+                $data['table_quote_values'],
                 array(
                     'quote_id' => $quote_id,
                     'value_id' => $value_id
                 )
             );
         }
+		?>
+			<button id="redirectButton" style="display:none;">
+				Redirect
+			</button>
+			<script>
+        		const redirectButton = document.getElementById("redirectButton");
+				redirectButton.addEventListener("click", function() {
+					location.href = "<?php echo add_query_arg(array('tce_page' => 'quotelist'), ''); ?>";
+				});
+				redirectButton.click();
+			</script>
+		<?php
+
     }else{
         echo '<span style="color:red;">Error Saving Quote!</span>';
     }
+
+	echo ob_get_clean();
 }
 
 
 function tce_delete_quote($data){
+	ob_start();
+
     global $wpdb;
 
     $result_values = $wpdb->delete($data['table_quote_values'], array('quote_id' => $data['quote_id']), array('%d'));
+
+	$result_tokens = $wpdb->delete($data['table_tokens'], array('quote_id' => $data['quote_id']), array('%d'));
+	
     $result_info = $wpdb->delete($data['table_quote_info'], array('id' => $data['quote_id']), array('%d'));
 
-    if($result_values === false || $result_info === false){
-        echo '<span style="color:red;">Error Deleting Quote!</span>';
-    }else{
-        echo '<span style="color:green;">Quote Deleted Successfully!</span>';
-    }
+    ?>
+		<button id="redirectButton" style="display:none;">
+			Redirect
+		</button>
+		<script>
+			const redirectButton = document.getElementById("redirectButton");
+			redirectButton.addEventListener("click", function() {
+				location.href = "<?php echo add_query_arg(array('tce_page' => 'quotelist'), ''); ?>";
+			});
+			redirectButton.click();
+		</script>
+	<?php
+	
+	echo ob_get_clean();
 }
 
 
@@ -538,7 +665,6 @@ function tce_calculator(){
             break;
         case 'savequote':
             tce_save_quote($data);
-            tce_quote_list($data);
             break;
         case 'deletequote':
             tce_delete_quote($data);
