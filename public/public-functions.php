@@ -496,14 +496,14 @@ function tce_authenticate($data){
 
 	if(!tce_is_authenticated($data)){
 		?>
-		<div style="text-align:center;max-width:350px;width:100%;box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;">
+		<div style="margin:30px auto;text-align:center;max-width:350px;width:100%;box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;">
 			<?php
 				$quote = $wpdb->get_row("SELECT name FROM " . $data['table_quote_info'] . " WHERE id = " . $data['quote_id']);
 			?>
 			<div style="padding:20px;">
-				<h4><?php echo $quote->name; ?>님 견적서</h4>
-				<h6 style="color:#3CA1FF;">비밀글 기능으로 보호된 글입니다.</h6>
-				<h6>작성자와 관리자만 열람하실 수 있습니다. 본인이라면 비밀번호를 입력하세요.</h6>
+				<h2><span style="color:red;"><?php echo $quote->name; ?></span>님 견적서</h2>
+				<span style="color:#3CA1FF;">비밀글 기능으로 보호된 글입니다.</span><br>
+				<span>작성자와 관리자만 열람하실 수 있습니다. 본인이라면 비밀번호를 입력하세요.</span>
 			</div>
 			<hr style="margin:0px;">
 		
